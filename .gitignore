@@ -1,3 +1,4 @@
 tmp_repo
 settings_local.py
 __pycache__
+user_logs/*
