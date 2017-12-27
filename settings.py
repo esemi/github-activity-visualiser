@@ -1,6 +1,6 @@
 import datetime
 
-GITHUB_TOKEN = 'TODO'
+GITHUB_TOKEN = '%GITHUB_TOKEN%'
 TIMESTAMP_BORDER = int((datetime.datetime.utcnow() - datetime.timedelta(days=365)).timestamp())
 DEBUG = False
 

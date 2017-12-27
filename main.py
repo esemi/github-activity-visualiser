@@ -92,7 +92,7 @@ def main(user_login: str):
         logging.exception(e)
         return
 
-    log_files = clone_and_fetch_log(user_repos)
+    log_files = clone_and_fetch_log(user_repos[:3])
 
     if not log_files:
         logging.warning('not found user repos for vis (sic!)')
