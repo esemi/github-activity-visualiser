@@ -102,8 +102,6 @@ def main(user_login: str):
 
     # todo filtering logs (by username) ?
 
-    # todo visualise
-
     subprocess.run('gource -s 1 -e 0.005 --title "One year of %s development" --follow-user %s %s' %
                    (user_name, user_name, final_log), shell=True)
 
