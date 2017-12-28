@@ -1,6 +1,6 @@
 # Activity visualiser for github users 
 
-#todo link to habr
+https://habrahabr.ru/company/semrush/blog/345818/
 
 ![КДПВ](https://habrastorage.org/webt/jq/os/wn/jqoswnphohklp8eswtsejbgtxty.gif)
 
