@@ -1,3 +1,4 @@
 tmp_repo
-visualiser/settings_local.py
-user_logs/*
+github_activity_visualiser/settings_local.py
+user_logs/
+dist/

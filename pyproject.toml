@@ -1,18 +1,25 @@
 [tool.poetry]
-name = "github-activity-visualiser"
-version = "0.1.0"
+name = "github_activity_visualiser"
+version = "0.1.1"
 description = ""
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/esemi/github-activity-visualiser"
 authors = ["Simon <spam@esemi.ru>"]
+
+
+[tool.poetry.scripts]
+visualiser = "github_activity_visualiser.visualiser:cli"
+
 
 [tool.poetry.dependencies]
 python = "^3.9"
 PyGithub = "^1.55"
 click = "^8.0.1"
 
+
 [tool.poetry.dev-dependencies]
 
-[tool.poetry.scripts]
-visualiser = "visualiser.visualiser:cli"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

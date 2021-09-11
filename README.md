@@ -10,6 +10,11 @@ Github user activity visualiser
 ![КДПВ](https://habrastorage.org/webt/jq/os/wn/jqoswnphohklp8eswtsejbgtxty.gif)
 
 ### Usage
+
+U need [token](https://github.com/settings/tokens) for this tool
+todo
+
+### Run from source
 ```
 $ git clone https://github.com/esemi/github-activity-visualiser.git
 $ cd github-activity-visualiser
@@ -19,6 +24,5 @@ $ pip install poetry
 $ poetry config virtualenvs.create false --local
 $ poetry install
 $ apt install gource
-### generate new token here https://github.com/settings/tokens and past on next step
-$ poetry run python visualiser/visualiser.py --help
+$ poetry run python github_activity_visualiser/visualiser.py --help
 ```
