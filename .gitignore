@@ -1,4 +1,3 @@
 tmp_repo
-settings_local.py
-__pycache__
+visualiser/settings_local.py
 user_logs/*

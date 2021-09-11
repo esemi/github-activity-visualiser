@@ -1,44 +1,42 @@
-#!/usr/bin/env python3
-
 import datetime
 import logging
 import os
 import shutil
 import subprocess
-import sys
-from github import Github
+from typing import List
 
-import settings
+import click
+from github import Github, Repository
 
 
-def load_user_repos(user: str) -> (list, str):
-    logging.info('start load user repos %s', user)
-    g = Github(settings.GITHUB_TOKEN)
-    user = g.get_user(user)
+def load_user_repos(user_name: str, secret_token: str) -> List[Repository.Repository]:
+    logging.info('start load user repos %s', user_name)
+    g = Github(secret_token)
+    user = g.get_user(user_name)
     assert user.name
 
     repos = [r for r in user.get_repos()
              if not r.fork and not r.private]
     logging.info('found %d public repos for %s', len(repos), user.name)
-    return repos, user.name
+    return repos
 
 
-def clone_and_fetch_log(repos: list) -> list:
+def clone_and_fetch_log(tmp_dir: str, data_dir: str, repos: List[Repository.Repository]) -> List[str]:
     logfiles = []
     for repo in repos:
         logging.info('clone %s', repo)
 
         try:
-            shutil.rmtree(settings.REPO_TMP_FOLDER)
+            shutil.rmtree(tmp_dir)
         except FileNotFoundError:
             pass
-        cmd_clone = "git clone %s %s" % (repo.clone_url, settings.REPO_TMP_FOLDER)
+        cmd_clone = "git clone %s %s" % (repo.clone_url, tmp_dir)
         process = subprocess.run(cmd_clone, shell=True)
         logging.debug('%s %s' % (cmd_clone, process.returncode))
         assert process.returncode == 0
 
-        filename = os.path.join(settings.DATA_FOLDER, '%s.log' % repo.name)
-        cmd_gen = "gource --output-custom-log %s %s" % (filename, settings.REPO_TMP_FOLDER)
+        filename = os.path.join(data_dir, '%s.log' % repo.name)
+        cmd_gen = "gource --output-custom-log %s %s" % (filename, tmp_dir)
         process = subprocess.run(cmd_gen, shell=True)
         logging.debug('%s %s' % (cmd_gen, process.returncode))
 
@@ -49,17 +47,17 @@ def clone_and_fetch_log(repos: list) -> list:
         logfiles.append(filename)
 
     try:
-        shutil.rmtree(settings.REPO_TMP_FOLDER)
+        shutil.rmtree(tmp_dir)
     except FileNotFoundError:
         pass
     logging.info('complete parsed %d repos', len(logfiles))
     return logfiles
 
 
-def combine_log(log_files: list) -> str:
+def combine_log(data_dir: str, log_files: List[str], history_days: int) -> str:
     current_date = str(datetime.date.today()).replace(' ', '_')
-    tmp_log_file = os.path.join(settings.DATA_FOLDER, 'gource_tmp_%s.log' % current_date)
-    final_log_file = os.path.join(settings.DATA_FOLDER, 'gource_final_%s.log' % current_date)
+    tmp_log_file = os.path.join(data_dir, 'gource_tmp_%s.log' % current_date)
+    final_log_file = os.path.join(data_dir, 'gource_final_%s.log' % current_date)
 
     for filename in {final_log_file, tmp_log_file}:
         try:
@@ -77,9 +75,10 @@ def combine_log(log_files: list) -> str:
         logging.debug('%s %s' % (cmd_sed, process.returncode))
 
     # filter logs
+    timestamp_border = int((datetime.datetime.utcnow() - datetime.timedelta(days=history_days)).timestamp())
     cmd = "cat %s | awk '$1 > %d {print $0;}' | sort -n > %s" % (
         tmp_log_file,
-        settings.TIMESTAMP_BORDER,
+        timestamp_border,
         final_log_file,
     )
     logging.info('filter logs %s' % cmd)
@@ -88,28 +87,36 @@ def combine_log(log_files: list) -> str:
     return final_log_file
 
 
-def main(user_login: str):
+@click.command()
+@click.argument('user_name', required=True)
+@click.argument('github_token', required=True)
+@click.option('--count', default=3, help='Limit of repos.')
+@click.option('--history_days', default=365)
+@click.option('--data_dir', default='user_logs')
+@click.option('--tmp_dir', default='tmp_repo')
+@click.option('--verbose', is_flag=True)
+def cli(user_name: str, github_token: str, count: int, verbose: bool, data_dir: str, tmp_dir: str, history_days: int):
+    logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s',
+                        level=logging.DEBUG if verbose else logging.INFO,
+                        datefmt='%Y-%m-%d %H:%M:%S')
+
     try:
-        user_repos, user_name = load_user_repos(user_login)
+        user_repos = load_user_repos(user_name, github_token)
     except Exception as e:
         logging.exception(e)
         return
 
-    log_files = clone_and_fetch_log(user_repos[:3])
+    log_files = clone_and_fetch_log(tmp_dir, data_dir, user_repos[:count])
 
     if not log_files:
         logging.warning('not found user repos for vis (sic!)')
         return
 
-    final_log = combine_log(log_files)
+    final_log = combine_log(data_dir, log_files, history_days)
 
-    subprocess.run('gource -s 1 -e 0.005 --title "One year of %s development" --follow-user %s %s' %
-                   (user_name, user_name, final_log), shell=True)
+    subprocess.run(f'gource -s 1 -e 0.005 --title "{history_days} days of {user_name} development" '
+                   f'--follow-user {user_name} {final_log}', shell=True)
 
 
 if __name__ == '__main__':
-    logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s',
-                        level=logging.DEBUG if settings.DEBUG else logging.INFO,
-                        datefmt='%Y-%m-%d %H:%M:%S')
-    assert len(sys.argv) > 1
-    main(sys.argv[1])
+    cli()

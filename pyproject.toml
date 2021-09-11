@@ -7,8 +7,12 @@ authors = ["Simon <spam@esemi.ru>"]
 [tool.poetry.dependencies]
 python = "^3.9"
 PyGithub = "^1.55"
+click = "^8.0.1"
 
 [tool.poetry.dev-dependencies]
+
+[tool.poetry.scripts]
+visualiser = "visualiser.visualiser:cli"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

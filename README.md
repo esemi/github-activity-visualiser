@@ -20,6 +20,5 @@ $ poetry config virtualenvs.create false --local
 $ poetry install
 $ apt install gource
 ### generate new token here https://github.com/settings/tokens and past on next step
-$ sed -i -- 's/%GITHUB_TOKEN%/U_TOKEN_HERE/g' settings.py
-$ ./main.py USER_NAME
+$ poetry run python visualiser/visualiser.py --help
 ```
