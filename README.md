@@ -1,14 +1,13 @@
 Github user activity visualiser 
 ---
-[description (rus)](https://habrahabr.ru/company/semrush/blog/345818/)
-
-![КДПВ](https://habrastorage.org/webt/jq/os/wn/jqoswnphohklp8eswtsejbgtxty.gif)
-
 - download all user's public repositories
 - filter forks and mirrors
 - build a one year activity log
 - run a gource on it
 
+[more details (rus)](https://habrahabr.ru/company/semrush/blog/345818/)
+
+![КДПВ](https://habrastorage.org/webt/jq/os/wn/jqoswnphohklp8eswtsejbgtxty.gif)
 
 ### Usage
 
