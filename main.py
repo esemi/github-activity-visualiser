@@ -2,11 +2,10 @@
 
 import datetime
 import logging
-import subprocess
 import os
-import sys
 import shutil
-
+import subprocess
+import sys
 from github import Github
 
 import settings
@@ -73,12 +72,16 @@ def combine_log(log_files: list) -> str:
         project = repo_filepath.split('/')[1][:-4]
         logging.debug('project name %s', project)
 
-        cmd_sed = "sed -r 's#(.+)\|#\\1|/%s#' %s >> %s" % (project, repo_filepath, tmp_log_file)
+        cmd_sed = 'sed -r "s#(.+)|#\\1|/%s#" %s >> %s' % (project, repo_filepath, tmp_log_file)
         process = subprocess.run(cmd_sed, shell=True)
         logging.debug('%s %s' % (cmd_sed, process.returncode))
 
     # filter logs
-    cmd = "cat %s | awk '$1 > %d {print $0;}' | sort -n > %s" % (tmp_log_file, settings.TIMESTAMP_BORDER, final_log_file)
+    cmd = "cat %s | awk '$1 > %d {print $0;}' | sort -n > %s" % (
+        tmp_log_file,
+        settings.TIMESTAMP_BORDER,
+        final_log_file,
+    )
     logging.info('filter logs %s' % cmd)
     process = subprocess.run(cmd, shell=True)
     logging.debug('%s %s' % (cmd, process.returncode))
@@ -99,8 +102,6 @@ def main(user_login: str):
         return
 
     final_log = combine_log(log_files)
-
-    # todo filtering logs (by username) ?
 
     subprocess.run('gource -s 1 -e 0.005 --title "One year of %s development" --follow-user %s %s' %
                    (user_name, user_name, final_log), shell=True)
